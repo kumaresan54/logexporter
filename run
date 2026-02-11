@@ -1,0 +1,49 @@
+#!/bin/zsh
+# Script to run all Spring Boot applications in subfolders
+
+start_apps() {
+  for app in orchestrator customer pricing vehicle; do
+    if [ -d "$app" ]; then
+      echo "Starting $app..."
+      cd "$app" && ./gradlew bootRun > /dev/null 2>&1 &
+      cd ..
+    else
+      echo "$app directory not found."
+    fi
+  done
+
+  # Wait a moment and show running processes
+  echo "Applications are starting in the background."
+  ps | grep gradle
+
+}
+
+stop_apps() {
+  echo "Stopping all Spring Boot applications..."
+  for app in orchestrator customer pricing vehicle; do
+    if [ -d "$app" ]; then
+      # Find gradle bootRun processes for each app and kill them
+      pids=$(ps aux | grep "$app/gradle/wrapper/gradle-wrapper.jar.*bootRun" | grep -v grep | awk '{print $2}')
+      if [ -n "$pids" ]; then
+        echo "Killing $app gradle bootRun processes: $pids"
+        kill $pids
+      else
+        echo "No running gradle bootRun process found for $app."
+      fi
+    fi
+  done
+}
+
+usage() {
+  echo "Usage: $0 [
+      start_apps
+      stop_all_apps
+    ]"
+  exit 1
+}
+CMD=${1:-}
+case ${CMD} in
+start_apps) start_apps;;
+stop_apps) stop_apps;;
+*) usage ;;
+esac
