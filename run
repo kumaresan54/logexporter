@@ -1,8 +1,21 @@
 #!/bin/zsh
 # Script to run all Spring Boot applications in subfolders
 
+APPS=(orchestrator customer pricing vehicle)
+
 start_apps() {
-  for app in orchestrator customer pricing vehicle; do
+  # Check if datadog-agent-local container is running in orchestrator
+  if [ -d "orchestrator" ]; then
+    container_running=$(docker ps --filter "name=datadog-agent-local" --filter "status=running" -q)
+    if [ -n "$container_running" ]; then
+      echo "datadog-agent-local container is already running in orchestrator. Skipping docker-compose."
+    else
+      echo "Starting docker-compose in orchestrator..."
+      (cd orchestrator && docker-compose up -d)
+    fi
+  fi
+
+  for app in "${APPS[@]}"; do
     if [ -d "$app" ]; then
       # Check if gradle bootRun is already running for this app
       running=$(ps aux | grep "$app/gradle/wrapper/gradle-wrapper.jar.*bootRun" | grep -v grep)
@@ -21,12 +34,11 @@ start_apps() {
   # Wait a moment and show running processes
   echo "Applications are starting in the background."
   ps | grep gradle
-
 }
 
 stop_apps() {
   echo "Stopping all Spring Boot applications..."
-  for app in orchestrator customer pricing vehicle; do
+  for app in "${APPS[@]}"; do
     if [ -d "$app" ]; then
       # Find gradle bootRun processes for each app and kill them
       pids=$(ps aux | grep "$app/gradle/wrapper/gradle-wrapper.jar.*bootRun" | grep -v grep | awk '{print $2}')
@@ -38,18 +50,54 @@ stop_apps() {
       fi
     fi
   done
+
+  # Stop datadog-agent-local container if running
+  container_running=$(docker ps --filter "name=datadog-agent-local" --filter "status=running" -q)
+  if [ -n "$container_running" ]; then
+    echo "Stopping datadog-agent-local container..."
+    docker stop datadog-agent-local
+  else
+    echo "datadog-agent-local container is not running."
+  fi
+}
+
+tail_logs() {
+  echo "Available apps: ${APPS[*]}"
+  read "app?Enter app name to tail logs: "
+  found=false
+  for a in "${APPS[@]}"; do
+    if [ "$a" = "$app" ]; then
+      found=true
+      break
+    fi
+  done
+  if $found; then
+    log_file="./logs/$app.log"
+    if [ -f "$log_file" ]; then
+      echo "Tailing logs for $app..."
+      tail -f "$log_file"
+    else
+      echo "Log file $log_file not found."
+    fi
+  else
+    echo "Invalid app name: $app"
+    echo "Valid options: ${APPS[*]}"
+  fi
 }
 
 usage() {
   echo "Usage: $0 [
       start_apps
       stop_all_apps
+      tail_logs <app_name>
     ]"
   exit 1
 }
 CMD=${1:-}
+shift
 case ${CMD} in
 start_apps) start_apps;;
 stop_apps) stop_apps;;
+tail_logs) tail_logs "$1";;
 *) usage ;;
 esac
