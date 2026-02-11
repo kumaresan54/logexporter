@@ -11,12 +11,14 @@ LogExporter is a Spring Boot application designed to simulate and log various er
 - **JSON Logging:** All logs are formatted in JSON for easy ingestion by Datadog.
 - **Swagger UI:** Interactive API documentation available at `/swagger-ui/index.html`.
 - **H2 In-Memory Database:** Used for DB error simulation.
+- **Datadog Agent Integration:** Docker Compose setup for Datadog agent with log collection.
 
 ## Getting Started
 
 ### Prerequisites
 - Java 17+
 - Gradle (wrapper included)
+- Docker (for Datadog agent)
 
 ### Build & Run
 1. **Install dependencies and build:**
@@ -48,15 +50,27 @@ LogExporter is a Spring Boot application designed to simulate and log various er
 
 ## Logging & Datadog Integration
 - Logs are output in JSON format via Logback and Logstash encoder.
-- Easily export logs to Datadog for error analysis and observability.
+- Logback writes logs to `./logs/logexporter.log`.
+- Datadog agent is started via Docker Compose and collects logs from `./logs/logexporter.log`.
+- Datadog log configuration (`datadog/conf.d/logexporter.d/conf.yaml`):
+  ```yaml
+  logs:
+    - type: file
+      path: /logs/logexporter.log
+      service: logexporter
+      source: java
+      encoding: utf-8
+      tags:
+        - env:dev
+  ```
+- Replace `YOUR_DATADOG_API_KEY` in `docker-compose.yml` with your actual Datadog API key.
+- Make sure the `logs` directory exists and is writable by both your app and Datadog agent.
 
 ## Configuration
 - **Database:** Uses H2 in-memory DB for error simulation.
-- **Logback:** Configured in `logback-spring.xml` for JSON output.
+- **Logback:** Configured in `logback-spring.xml` for JSON output and file logging.
 - **Swagger:** Enabled via `springdoc-openapi-starter-webmvc-ui` dependency.
-
-## License
-This project is licensed under the Apache License 2.0.
+- **Datadog Agent:** Configured via `docker-compose.yml` and `conf.yaml` for log collection.
 
 ---
 For more details, see the source code and Swagger UI.
