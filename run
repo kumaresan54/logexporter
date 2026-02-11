@@ -4,9 +4,15 @@
 start_apps() {
   for app in orchestrator customer pricing vehicle; do
     if [ -d "$app" ]; then
-      echo "Starting $app..."
-      cd "$app" && ./gradlew bootRun > /dev/null 2>&1 &
-      cd ..
+      # Check if gradle bootRun is already running for this app
+      running=$(ps aux | grep "$app/gradle/wrapper/gradle-wrapper.jar.*bootRun" | grep -v grep)
+      if [ -n "$running" ]; then
+        echo "$app is already running. Skipping start."
+      else
+        echo "Starting $app..."
+        cd "$app" && ./gradlew bootRun > /dev/null 2>&1 &
+        cd ..
+      fi
     else
       echo "$app directory not found."
     fi

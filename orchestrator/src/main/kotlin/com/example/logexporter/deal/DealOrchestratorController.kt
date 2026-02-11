@@ -1,31 +1,36 @@
 package com.example.logexporter.deal
 
-import com.example.logexporter.deal.pricing.PricingService
-import com.example.logexporter.deal.vehicle.VehicleService
-import com.example.logexporter.deal.customer.CustomerService
+import io.swagger.v3.oas.annotations.Operation
 import org.slf4j.LoggerFactory
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.web.bind.annotation.GetMapping
+import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
-import io.swagger.v3.oas.annotations.Operation
 
 @RestController
-class DealOrchestratorController(
+@RequestMapping
+class DealOrchestratorController @Autowired constructor(
+    private val customerService: CustomerService,
     private val pricingService: PricingService,
-    private val vehicleService: VehicleService,
-    private val customerService: CustomerService
+    private val vehicleService: VehicleService
 ) {
     private val logger = LoggerFactory.getLogger(DealOrchestratorController::class.java)
 
-    @Operation(summary = "Orchestrate deal", description = "Invokes pricing, vehicle, and customer services and logs each step with dealId")
+    @Operation(summary = "Orchestrate deal", description = "Invokes pricing, vehicle, and customer services via HTTP and logs each step with dealId. Optionally simulates business errors in one service.")
     @GetMapping("/deal/orchestrate")
-    fun orchestrateDeal(@RequestParam dealId: String): String {
-        logger.info("DealOrchestratorController: Starting deal orchestration for dealId: $dealId")
-        val price = pricingService.getPricing(dealId)
+    fun orchestrateDeal(
+        @RequestParam dealId: String,
+        @RequestParam(required = false, defaultValue = "false") simulateError: Boolean
+    ): String {
+        logger.info("DealOrchestratorController: Starting deal orchestration for dealId: $dealId, simulateError: $simulateError")
+        // Randomly pick one service to simulate error if flag is true
+        val errorTarget = if (simulateError) listOf("pricing", "vehicle", "customer").random() else null
+        val price = pricingService.getPricing(dealId, simulateError = (errorTarget == "pricing"))
         logger.info("DealOrchestratorController: Pricing fetched for dealId: $dealId: $price")
-        val vehicle = vehicleService.getVehicle(dealId)
+        val vehicle = vehicleService.getVehicle(dealId, simulateError = (errorTarget == "vehicle"))
         logger.info("DealOrchestratorController: Vehicle fetched for dealId: $dealId: $vehicle")
-        val customer = customerService.getCustomer(dealId)
+        val customer = customerService.getCustomer(dealId, simulateError = (errorTarget == "customer"))
         logger.info("DealOrchestratorController: Customer fetched for dealId: $dealId: $customer")
         logger.info("DealOrchestratorController: Deal is success for dealId: $dealId")
         return "Deal is success"
