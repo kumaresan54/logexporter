@@ -1,7 +1,7 @@
 logs:
   - type: file
     path: /logs/*.log
-    service: logexporter
+    service: orchestrator
     source: java
     encoding: utf-8
     tags:
