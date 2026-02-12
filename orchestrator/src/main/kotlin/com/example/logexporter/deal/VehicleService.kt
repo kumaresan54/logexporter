@@ -8,4 +8,8 @@ class VehicleService(private val restTemplate: RestTemplate) {
     fun getVehicle(dealId: String, simulateError: Boolean = false): String? {
         return restTemplate.getForObject("http://localhost:8083/vehicle?dealId=$dealId&simulateError=$simulateError", String::class.java)
     }
+
+    fun getVehicleWithBusinessLogic(dealId: String, model: String): String? {
+        return restTemplate.getForObject("http://localhost:8083/vehicle?dealId=$dealId&model=$model", String::class.java)
+    }
 }

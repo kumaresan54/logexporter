@@ -6,7 +6,7 @@ services:
     environment:
       - DD_API_KEY=<>
       - DD_LOGS_CONFIG_CONTAINER_COLLECT_ALL=false
-      - DD_SITE=datadoghq.com
+      - DD_SITE=us5.datadoghq.com
       - DD_LOGS_ENABLED=true
       - DD_SECURITY_AGENT_ENABLED=false
       - DD_APM_ENABLED=true

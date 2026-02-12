@@ -21,14 +21,15 @@ class DealOrchestratorController @Autowired constructor(
     @GetMapping("/deal/orchestrate")
     fun orchestrateDeal(
         @RequestParam dealId: String,
-        @RequestParam(required = false, defaultValue = "false") simulateError: Boolean
+        @RequestParam(required = false, defaultValue = "false") simulateError: Boolean,
+        @RequestParam(required = false, defaultValue = "AMG") model: String
     ): String {
-        logger.info("DealOrchestratorController: Starting deal orchestration for dealId: $dealId, simulateError: $simulateError")
+        logger.info("DealOrchestratorController: Starting deal orchestration for dealId: $dealId, simulateError: $simulateError, model: $model")
         // Randomly pick one service to simulate error if flag is true
-        val errorTarget = if (simulateError) listOf("pricing", "vehicle", "customer").random() else null
+        val errorTarget = if (simulateError) listOf("pricing", "customer").random() else null
         val price = pricingService.getPricing(dealId, simulateError = (errorTarget == "pricing"))
         logger.info("DealOrchestratorController: Pricing fetched for dealId: $dealId: $price")
-        val vehicle = vehicleService.getVehicle(dealId, simulateError = (errorTarget == "vehicle"))
+        val vehicle = vehicleService.getVehicleWithBusinessLogic(dealId, model)
         logger.info("DealOrchestratorController: Vehicle fetched for dealId: $dealId: $vehicle")
         val customer = customerService.getCustomer(dealId, simulateError = (errorTarget == "customer"))
         logger.info("DealOrchestratorController: Customer fetched for dealId: $dealId: $customer")

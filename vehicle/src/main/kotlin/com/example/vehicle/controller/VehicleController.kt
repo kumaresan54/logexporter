@@ -6,7 +6,11 @@ import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
-import kotlin.random.Random
+
+// VehicleModel enum to represent supported models
+enum class VehicleModel {
+    AMG, GCLASS, BMW, AUDI, TESLA, HONDA, TOYOTA, FORD, CHEVROLET, NISSAN, OTHER
+}
 
 @RestController
 @RequestMapping
@@ -16,19 +20,14 @@ class VehicleController(private val vehicleService: VehicleService) {
     @GetMapping("/vehicle")
     fun getVehicle(
         @RequestParam dealId: String,
-        @RequestParam(required = false, defaultValue = "false") simulateError: Boolean
+        @RequestParam model: VehicleModel
     ): ResponseEntity<Any> {
-        logger.info("VehicleController: Received vehicle request for dealId: $dealId, simulateError: $simulateError")
-        if (simulateError) {
-            val errors = listOf(
-                "Vehicle not found",
-                "DB failure",
-                "External service failure"
-            )
-            val error = errors[Random.nextInt(errors.size)]
-            logger.warn("VehicleController: $error for dealId: $dealId")
-            return ResponseEntity.internalServerError().body(mapOf("error" to error))
+        logger.info("VehicleController: Received vehicle request for dealId: $dealId, model: $model")
+        val result = vehicleService.getVehicleWithBusinessLogic(dealId, model)
+        if (result is String) {
+            logger.warn("VehicleController: $result for dealId: $dealId, model: $model")
+            return ResponseEntity.badRequest().body(result)
         }
-        return ResponseEntity.ok(vehicleService.getVehicle(dealId))
+        return ResponseEntity.ok(result)
     }
 }
