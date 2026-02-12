@@ -8,4 +8,8 @@ class PricingService(private val restTemplate: RestTemplate) {
     fun getPricing(dealId: String, simulateError: Boolean = false): String? {
         return restTemplate.getForObject("http://localhost:8082/pricing?dealId=$dealId&simulateError=$simulateError", String::class.java)
     }
+
+    fun getPricingInfo(dealId: String, simulateError: Boolean = false): String? {
+        return restTemplate.getForObject("http://localhost:8082/pricingInfo?dealId=$dealId", String::class.java)
+    }
 }

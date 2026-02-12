@@ -13,7 +13,8 @@ import org.springframework.web.bind.annotation.RestController
 class DealOrchestratorController @Autowired constructor(
     private val customerService: CustomerService,
     private val pricingService: PricingService,
-    private val vehicleService: VehicleService
+    private val vehicleService: VehicleService,
+    private val creditCheckService: CreditCheckService
 ) {
     private val logger = LoggerFactory.getLogger(DealOrchestratorController::class.java)
 
@@ -36,4 +37,26 @@ class DealOrchestratorController @Autowired constructor(
         logger.info("DealOrchestratorController: Deal is success for dealId: $dealId")
         return "Deal is success"
     }
+
+    @Operation(summary = "Perform credit check", description = "Performs credit check for a customer and returns the result")
+    @GetMapping("/credit/check")
+    fun performCreditCheck(
+        @RequestParam dealId: String,
+    ): String {
+
+        logger.info("CreditCheckController: Starting credit check for dealId: $dealId")
+        return try {
+            val customer = customerService.getCustomer(dealId)
+            val pricing = pricingService.getPricingInfo(dealId)
+
+            val creditResult = creditCheckService.checkCredit()
+            logger.info("CreditCheckController: Credit check completed for dealId: $dealId, result: $creditResult")
+            "Credit check ${if (creditResult == "APPROVED") "approved" else "denied"} for customer"
+        } catch (e: Exception) {
+            logger.error("CreditCheckController: Credit check failed for dealId: $dealId", e)
+            "Credit check failed for customer"
+        }
+    }
+
+
 }

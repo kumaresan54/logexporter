@@ -31,4 +31,15 @@ class PricingController(private val pricingService: PricingService) {
         }
         return ResponseEntity.ok(pricingService.getPricing(dealId))
     }
+
+    @GetMapping("/pricingInfo")
+    fun getPricingInfo(
+        @RequestParam dealId: String,
+        @RequestParam(required = false, defaultValue = "false") simulateError: Boolean
+    ): ResponseEntity<Any> {
+       if (dealId=="852")
+           return ResponseEntity.notFound().build()
+
+        return ResponseEntity.ok(pricingService.getPricing(dealId))
+    }
 }
