@@ -43,12 +43,13 @@ class DealOrchestratorController @Autowired constructor(
     @GetMapping("/credit/check")
     fun performCreditCheck(
         @RequestParam dealId: String,
+        @RequestParam(required = false, defaultValue = "AMG") model: VehicleModel
     ): String {
 
         logger.info("CreditCheckController: Starting credit check for dealId: $dealId")
         return try {
-            val customer = customerService.getCustomer(dealId)
-            val pricing = pricingService.getPricingInfo(dealId)
+            val customer = customerService.getCustomer(dealId, model.name)
+            val pricing = pricingService.getPricing(dealId, model.name)
 
             val creditResult = creditCheckService.checkCredit()
             logger.info("CreditCheckController: Credit check completed for dealId: $dealId, result: $creditResult")
