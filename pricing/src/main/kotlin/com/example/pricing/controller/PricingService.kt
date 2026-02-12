@@ -2,13 +2,35 @@ package com.example.pricing.controller
 
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
+import java.util.concurrent.ConcurrentHashMap
+import kotlin.random.Random
 
 @Service
 class PricingService(private val mapper: PricingMapper) {
     private val logger = LoggerFactory.getLogger(PricingService::class.java)
-    fun getPricing(dealId: String): PricingDto {
+    private val cache = ConcurrentHashMap<String, OrderSummary>()
+    fun getPricing(dealId: String): OrderSummary {
+        val cacheKey = "order-summary-$dealId"
         logger.info("PricingService: Fetching price for dealId: $dealId")
-        return mapper.toDto(dealId)
+        return cache.computeIfAbsent(cacheKey) {
+            logger.info("Cache MISS → generating summary userId={}", dealId)
+            generateSummary(dealId)
+        }
+    }
+
+    private fun generateSummary(dealId: String): OrderSummary {
+        Thread.sleep(Random.nextLong(50, 200)) // simulate processing delay
+
+        val summary = OrderSummary(
+            dealId = dealId,
+            total = Random.nextDouble(100.0, 5000.0),
+            discount = Random.nextBoolean()
+        )
+
+        logger.info("Generated summary userId={} total={} discount={}",
+            summary.dealId, summary.total, summary.discount)
+
+        return summary
     }
 
     fun getPricingWithModelValidation(dealId: String, model: String): Any {
