@@ -5,7 +5,7 @@ import org.springframework.web.client.RestTemplate
 
 @Service
 class CustomerService(private val restTemplate: RestTemplate) {
-    fun getCustomer(dealId: String, simulateError: Boolean = false): String? {
-        return restTemplate.getForObject("http://localhost:8081/customer?dealId=$dealId&simulateError=$simulateError", String::class.java)
+    fun getCustomer(dealId: String, model: String): String? {
+        return restTemplate.getForObject("http://localhost:8081/customer?dealId=$dealId&model=$model", String::class.java)
     }
 }

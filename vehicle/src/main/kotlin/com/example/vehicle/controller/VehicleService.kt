@@ -16,10 +16,10 @@ class VehicleService(private val mapper: VehicleMapper) {
 
         val response = when (model) {
             VehicleModel.AMG -> getVehicle(dealId)
-            VehicleModel.GCLASS -> "G-Class not available: The Mercedes-Benz G-Class is not available in our inventory at the moment. Contact your dealer for future availability."
-            VehicleModel.CLE -> "CLE maintenance: The Mercedes-Benz CLE is undergoing scheduled maintenance and cannot be processed for new deals right now."
-            VehicleModel.BCLASS -> "B-Class discontinued: The Mercedes-Benz B-Class has been discontinued and is no longer offered for new deals."
-            VehicleModel.SCLASS -> "S-Class recall: The Mercedes-Benz S-Class has an active recall. Please resolve recall issues before proceeding."
+            VehicleModel.GCLASS ->  getVehicle(dealId)
+            VehicleModel.CLE -> getVehicle(dealId)
+            VehicleModel.BCLASS -> getVehicle(dealId)
+            VehicleModel.SCLASS -> getVehicle(dealId)
             VehicleModel.ECLASS -> "E-Class registration expired: The Mercedes-Benz E-Class registration has expired. Please renew registration before continuing."
             VehicleModel.ACLASS -> "A-Class insurance invalid: The Mercedes-Benz A-Class does not have valid insurance coverage. Update insurance details to proceed."
             VehicleModel.GLB -> "GLB emission issue: The Mercedes-Benz GLB does not meet current emission standards and cannot be processed."
@@ -29,4 +29,8 @@ class VehicleService(private val mapper: VehicleMapper) {
 
         return response
     }
+}
+
+enum class VehicleModel {
+    AMG, GCLASS, CLE, BCLASS, SCLASS, ECLASS, ACLASS, GLB, GLE, GLS
 }

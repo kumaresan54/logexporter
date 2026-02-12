@@ -22,18 +22,19 @@ class DealOrchestratorController @Autowired constructor(
     @GetMapping("/deal/orchestrate")
     fun orchestrateDeal(
         @RequestParam dealId: String,
-        @RequestParam(required = false, defaultValue = "false") simulateError: Boolean,
-        @RequestParam(required = false, defaultValue = "AMG") model: String
+        @RequestParam(required = false, defaultValue = "AMG") model: VehicleModel
     ): String {
-        logger.info("DealOrchestratorController: Starting deal orchestration for dealId: $dealId, simulateError: $simulateError, model: $model")
-        // Randomly pick one service to simulate error if flag is true
-        val errorTarget = if (simulateError) listOf("pricing", "customer").random() else null
-        val price = pricingService.getPricing(dealId, simulateError = (errorTarget == "pricing"))
-        logger.info("DealOrchestratorController: Pricing fetched for dealId: $dealId: $price")
-        val vehicle = vehicleService.getVehicleWithBusinessLogic(dealId, model)
-        logger.info("DealOrchestratorController: Vehicle fetched for dealId: $dealId: $vehicle")
-        val customer = customerService.getCustomer(dealId, simulateError = (errorTarget == "customer"))
+        logger.info("DealOrchestratorController: Starting deal orchestration for dealId: $dealId, model: $model")
+
+        val customer = customerService.getCustomer(dealId, model.name)
         logger.info("DealOrchestratorController: Customer fetched for dealId: $dealId: $customer")
+
+        val vehicle = vehicleService.getVehicleWithBusinessLogic(dealId, model.name)
+        logger.info("DealOrchestratorController: Vehicle fetched for dealId: $dealId: $vehicle")
+
+        val price = pricingService.getPricing(dealId, model.name)
+        logger.info("DealOrchestratorController: Pricing fetched for dealId: $dealId: $price")
+
         logger.info("DealOrchestratorController: Deal is success for dealId: $dealId")
         return "Deal is success"
     }
@@ -59,4 +60,8 @@ class DealOrchestratorController @Autowired constructor(
     }
 
 
+}
+
+enum class VehicleModel {
+    AMG, GCLASS, CLE, BCLASS, SCLASS, ECLASS, ACLASS, GLB, GLE, GLS
 }

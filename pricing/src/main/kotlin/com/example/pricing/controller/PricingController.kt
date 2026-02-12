@@ -4,7 +4,6 @@ import org.springframework.web.bind.annotation.RestController
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.GetMapping
 import org.slf4j.LoggerFactory
-import kotlin.random.Random
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.RequestMapping
 
@@ -16,20 +15,16 @@ class PricingController(private val pricingService: PricingService) {
     @GetMapping("/pricing")
     fun getPricing(
         @RequestParam dealId: String,
-        @RequestParam(required = false, defaultValue = "false") simulateError: Boolean
+        @RequestParam model: String
     ): ResponseEntity<Any> {
-        logger.info("PricingController: Received pricing request for dealId: $dealId, simulateError: $simulateError")
-        if (simulateError) {
-            val errors = listOf(
-                "Pricing not found",
-                "No Configuration available",
-                "External service failure"
-            )
-            val error = errors[Random.nextInt(errors.size)]
-            logger.warn("PricingController: $error for dealId: $dealId")
-            return ResponseEntity.internalServerError().body(mapOf("error" to error))
+        logger.info("PricingController: Received pricing request for dealId: $dealId, model: $model")
+        val result = pricingService.getPricingWithModelValidation(dealId, model)
+        if (result is String) {
+            logger.warn("PricingController: $result for dealId: $dealId, model: $model")
+            return ResponseEntity.internalServerError().body(result)
         }
-        return ResponseEntity.ok(pricingService.getPricing(dealId))
+
+        return ResponseEntity.ok(result)
     }
 
     @GetMapping("/pricingInfo")
