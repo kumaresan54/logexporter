@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.RestController
 
 // VehicleModel enum to represent supported models
 enum class VehicleModel {
-    AMG, GCLASS, BMW, AUDI, TESLA, HONDA, TOYOTA, FORD, CHEVROLET, NISSAN, OTHER
+    AMG, GCLASS, CLE, BCLASS, SCLASS, ECLASS, ACLASS, GLB, GLE, GLS
 }
 
 @RestController
@@ -20,14 +20,27 @@ class VehicleController(private val vehicleService: VehicleService) {
     @GetMapping("/vehicle")
     fun getVehicle(
         @RequestParam dealId: String,
-        @RequestParam model: VehicleModel
+        @RequestParam model: String
     ): ResponseEntity<Any> {
         logger.info("VehicleController: Received vehicle request for dealId: $dealId, model: $model")
-        val result = vehicleService.getVehicleWithBusinessLogic(dealId, model)
+        val allowedModels = VehicleModel.values().map { it.name }
+        val vehicleModel = try {
+            VehicleModel.valueOf(model.uppercase())
+        } catch (e: IllegalArgumentException) {
+            logger.warn("VehicleController: Invalid model '$model' for dealId: $dealId")
+            return ResponseEntity.badRequest().body(mapOf(
+                "error" to "Invalid vehicle model: $model",
+                "allowedModels" to allowedModels
+            ))
+        }
+        val result = vehicleService.getVehicleWithBusinessLogic(dealId, vehicleModel)
         if (result is String) {
             logger.warn("VehicleController: $result for dealId: $dealId, model: $model")
             return ResponseEntity.badRequest().body(result)
         }
-        return ResponseEntity.ok(result)
+        return ResponseEntity.ok(mapOf(
+            "vehicle" to result,
+            "allowedModels" to allowedModels
+        ))
     }
 }
