@@ -1,4 +1,4 @@
-package com.example.logexporter
+package com.example.pricing
 
 import datadog.trace.api.CorrelationIdentifier
 import jakarta.servlet.FilterChain

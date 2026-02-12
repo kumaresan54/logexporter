@@ -1,5 +1,4 @@
-package com.example.logexporter
-
+package com.example.customer
 import datadog.trace.api.CorrelationIdentifier
 import jakarta.servlet.FilterChain
 import jakarta.servlet.http.HttpServletRequest
@@ -27,3 +26,4 @@ class LoggingFilter : OncePerRequestFilter() {
         }
     }
 }
+

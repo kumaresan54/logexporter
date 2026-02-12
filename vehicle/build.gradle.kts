@@ -28,6 +28,7 @@ dependencies {
     implementation("com.h2database:h2")
     implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.1.0")
     implementation("io.micrometer:micrometer-tracing-bridge-otel")
+    implementation("com.datadoghq:dd-trace-api:1.59.0")
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     testImplementation("org.jetbrains.kotlin:kotlin-test-junit5")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
