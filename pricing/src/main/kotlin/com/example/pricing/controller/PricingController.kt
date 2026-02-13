@@ -20,7 +20,7 @@ class PricingController(private val pricingService: PricingService) {
         logger.info("PricingController: Received pricing request for dealId: $dealId, model: $model")
         val result = pricingService.getPricingWithModelValidation(dealId, model)
         if (result is String) {
-            logger.warn("PricingController: $result for dealId: $dealId, model: $model")
+            logger.error("PricingController: $result for dealId: $dealId, model: $model")
             return ResponseEntity.internalServerError().body(result)
         }
 

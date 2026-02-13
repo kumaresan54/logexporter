@@ -23,7 +23,7 @@ class VehicleController(private val vehicleService: VehicleService) {
         val vehicleModel = try {
             VehicleModel.valueOf(model.uppercase())
         } catch (e: IllegalArgumentException) {
-            logger.warn("VehicleController: Invalid model '$model' for dealId: $dealId")
+            logger.error("VehicleController: Invalid model '$model' for dealId: $dealId")
             return ResponseEntity.badRequest().body(mapOf(
                 "error" to "Invalid vehicle model: $model",
                 "allowedModels" to allowedModels
@@ -31,7 +31,7 @@ class VehicleController(private val vehicleService: VehicleService) {
         }
         val result = vehicleService.getVehicleWithBusinessLogic(dealId, vehicleModel)
         if (result is String) {
-            logger.warn("VehicleController: $result for dealId: $dealId, model: $model")
+            logger.error("VehicleController: $result for dealId: $dealId, model: $model")
             return ResponseEntity.internalServerError().body(result)
         }
         return ResponseEntity.ok(mapOf(

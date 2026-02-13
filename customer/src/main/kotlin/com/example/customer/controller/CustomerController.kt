@@ -20,7 +20,7 @@ class CustomerController(private val customerService: CustomerService) {
         logger.info("CustomerController: Received customer request for dealId: $dealId, model: $model")
         val result = customerService.getCustomerWithModelValidation(dealId, model)
         if (result is String) {
-            logger.warn("CustomerController: $result for dealId: $dealId, model: $model")
+            logger.error("CustomerController: $result for dealId: $dealId, model: $model")
             return ResponseEntity.internalServerError().body(result)
         }
         return ResponseEntity.ok(result)

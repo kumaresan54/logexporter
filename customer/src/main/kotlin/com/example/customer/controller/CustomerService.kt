@@ -16,7 +16,7 @@ class CustomerService(private val mapper: CustomerMapper) {
         val vehicleModel = try {
             VehicleModel.valueOf(model.uppercase())
         } catch (e: IllegalArgumentException) {
-            logger.warn("Customer service: Invalid model '$model' for dealId: $dealId")
+            logger.error("Customer service: Invalid model '$model' for dealId: $dealId")
             return "Invalid model: $model, allowedModels are $allowedModels"
         }
 

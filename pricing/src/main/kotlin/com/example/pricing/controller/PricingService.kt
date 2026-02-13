@@ -14,11 +14,11 @@ class PricingService(private val mapper: PricingMapper) {
         logger.info("PricingService: Fetching price for dealId: $dealId")
 
         if (cache.containsKey(cacheKey)) {
-            logger.info("Cache HIT → returning cached summary for userId={}", dealId)
+            logger.info("Cache HIT → returning cached summary for dealId: $dealId")
         }
 
         return cache.computeIfAbsent(cacheKey) {
-            logger.info("Cache MISS → generating summary userId={}", dealId)
+            logger.info("Cache MISS → generating summary dealId: $dealId")
             generateSummary(dealId)
         }
     }
@@ -43,7 +43,7 @@ class PricingService(private val mapper: PricingMapper) {
         val modelEnum = try {
             VehicleModel.valueOf(model.uppercase())
         } catch (e: IllegalArgumentException) {
-            logger.warn("PricingService: Invalid model '$model' for dealId: $dealId")
+            logger.error("PricingService: Invalid model '$model' for dealId: $dealId")
             return "Invalid model: $model, allowedModels are $allowedModels"
 
         }
