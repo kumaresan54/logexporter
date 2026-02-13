@@ -12,6 +12,11 @@ class PricingService(private val mapper: PricingMapper) {
     fun getPricing(dealId: String): OrderSummary {
         val cacheKey = "order-summary"
         logger.info("PricingService: Fetching price for dealId: $dealId")
+
+        if (cache.containsKey(cacheKey)) {
+            logger.info("Cache HIT → returning cached summary for userId={}", dealId)
+        }
+
         return cache.computeIfAbsent(cacheKey) {
             logger.info("Cache MISS → generating summary userId={}", dealId)
             generateSummary(dealId)
