@@ -10,7 +10,7 @@ class PricingService(private val mapper: PricingMapper) {
     private val logger = LoggerFactory.getLogger(PricingService::class.java)
     private val cache = ConcurrentHashMap<String, OrderSummary>()
     fun getPricing(dealId: String): OrderSummary {
-        val cacheKey = "order-summary-$dealId"
+        val cacheKey = "order-summary"
         logger.info("PricingService: Fetching price for dealId: $dealId")
         return cache.computeIfAbsent(cacheKey) {
             logger.info("Cache MISS → generating summary userId={}", dealId)
